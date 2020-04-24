@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 class CleanUtil:
-    baseURI = 'D:/RiceClass/535/Indoor/UJIndoorLoc/'
+    baseURI = ''
     filename = ''
     df = None
 
