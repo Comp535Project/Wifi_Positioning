@@ -5,7 +5,13 @@ import matplotlib.pyplot as plt
 
 
 class CleanUtil:
+<<<<<<< HEAD
     baseURI = 'D:/RiceClass/535/Indoor/UJIndoorLoc/'
+=======
+    baseURI = ''
+    filename = ''
+    df = None
+>>>>>>> 6a07f11a4c6f6ad205fc82ce267dfd54863702b8
 
     def __init__(self, filename):
         self.filename = self.baseURI + filename
