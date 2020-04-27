@@ -5,14 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class CleanUtil:
-<<<<<<< HEAD
     baseURI = 'D:/RiceClass/535/Indoor/UJIndoorLoc/'
-=======
-    baseURI = ''
-    filename = ''
-    df = None
->>>>>>> 6a07f11a4c6f6ad205fc82ce267dfd54863702b8
-
     def __init__(self, filename):
         self.filename = self.baseURI + filename
         self.df = pd.read_csv(self.filename)
@@ -33,12 +26,16 @@ class CleanUtil:
         x.fillna(axis=0, method='ffill', inplace=True)
         y.fillna(axis=0, method='ffill', inplace=True)
         x = preprocessing.normalize(x, norm='l2')
+        # TODO:NORMALIZE following https://www.kaggle.com/sunnerli/train-some-simple-model-and-print-the-error/code
 
         X, y = x, y
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio, random_state=0)
         # print(type(X_train))
         # print(X_train.shape,X_test.shape,y_train.shape,y_test.shape)
         return X_train, X_test, y_train, y_test
+
+    def normalize_data(self):
+        pass
 
 
     def drop_data(self, columncount, rowcount):

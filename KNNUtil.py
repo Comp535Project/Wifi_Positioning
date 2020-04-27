@@ -4,7 +4,10 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from DataUtil import CleanUtil
 import matplotlib.pyplot as plt
 import time
-from sklearn import preprocessing
+
+"""
+cross validation - parameter fitting - data visualization
+"""
 
 class KNNUtil:
 
