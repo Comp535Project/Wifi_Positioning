@@ -1,26 +1,25 @@
 from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from DataUtil import CleanUtil
 import matplotlib.pyplot as plt
 import time
-
+from sklearn import preprocessing
 
 class KNNUtil:
-    k = 0
-    scores = []
-    k_range = None
 
-    def __init__(self, k):
+    def __init__(self, k, filename = 'trainingData.csv'):
+        self.scores = []
         self.k = k
         self.k_range = range(1, k)
+        self.filename = filename
 
     def classify(self):
         """
         classify with knn,loop and find best K
         :return:None
         """
-        X_train, X_test, y_train, y_test = CleanUtil('trainingData.csv').split_train_test(0.3)
-        # print(X_train.shape,type(X_train), X_test.shape,y_train.shape,y_test.shape)
+        X_train, X_test, y_train, y_test = CleanUtil(self.filename).split_train_test(0.3)
         for ki in self.k_range:
             print("k = " + str(ki) + " begin ")
             start = time.time()

@@ -1,6 +1,7 @@
 from KNNUtil import KNNUtil
 
 if __name__ == "__main__":
-    knn = KNNUtil(5)
+    k = input("input the max K: ")
+    knn = KNNUtil(eval(k))
     knn.classify()
     knn.plot_accuracy()
