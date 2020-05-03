@@ -76,7 +76,6 @@ class CleanUtil:
         plt.show()
         # print(rowres)
 
-
     def __str__(self):
         shapetemplate = "This file has shape of {} \n" \
                         "the info is :\n {} \n"
@@ -87,7 +86,12 @@ class CleanUtil:
     def __repr__(self):
         return self.__str__(self)
 
-#
-# if __name__ == "__main__":
-#     clean = CleanUtil('trainingData.csv')
-#     clean.drop_data(100, 13)
+if __name__ == "__main__":
+    clean = CleanUtil('trainingData.csv')
+    droptraining = clean.drop_data(100, 13)
+    cleanvalid = CleanUtil('validationData.csv')
+    dropvalid = cleanvalid.drop_data(100,13)
+    droptraining.to_csv('trainClean.csv')
+    dropvalid.to_csv('validationClean.csv')
+    # print(clean)
+    # clean.drop_data(100, 13)
