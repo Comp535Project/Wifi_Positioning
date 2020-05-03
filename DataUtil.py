@@ -2,7 +2,9 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
-
+import scipy.io as sio
+import numpy as np
+import h5py
 
 class CleanUtil:
     baseURI = 'D:/RiceClass/535/Indoor/UJIndoorLoc/'
@@ -25,7 +27,8 @@ class CleanUtil:
         y = self.df.loc[:, 'SPACEID']
         x.fillna(axis=0, method='ffill', inplace=True)
         y.fillna(axis=0, method='ffill', inplace=True)
-        x = preprocessing.normalize(x, norm='l2')
+        # x = preprocessing.normalize(x, norm='l2')
+        # print(x)
         # TODO:NORMALIZE following https://www.kaggle.com/sunnerli/train-some-simple-model-and-print-the-error/code
 
         X, y = x, y
@@ -45,9 +48,8 @@ class CleanUtil:
         """
         columnaggr = self.df.iloc[:, :520].where(self.df != 100).count()
         columnindex = columnaggr[columnaggr > columncount].index.tolist()
-        columnindex = columnindex + (self.df.iloc[:, 521:].columns.tolist())
+        columnindex = columnindex + (self.df.iloc[:, 520:].columns.tolist())
         filteredcolumn = self.df.loc[:, columnindex]
-
         rowaggr = filteredcolumn.where(self.df != 100).T.count()
         rowindex = rowaggr[rowaggr > rowcount].index.tolist()
         filterrow = filteredcolumn.loc[rowindex]
@@ -86,12 +88,28 @@ class CleanUtil:
     def __repr__(self):
         return self.__str__(self)
 
+
+class MatUtil:
+
+    def __init__(self,filename):
+        self.filename = filename
+        self.dataset = sio.loadmat(filename)
+
+    def mat_to_csv(self):
+        columns_ = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
+        features = pd.DataFrame(list(self.dataset.values())[-1])
+        rss = pd.DataFrame(list(self.dataset.values())[-2])
+        new_df = pd.concat([features,rss],axis=1)
+        new_df.columns = columns_
+        new_df.to_csv(self.filename+'.csv')
+        # print(new_df)
+
 if __name__ == "__main__":
-    clean = CleanUtil('trainingData.csv')
-    droptraining = clean.drop_data(100, 13)
-    cleanvalid = CleanUtil('validationData.csv')
-    dropvalid = cleanvalid.drop_data(100,13)
-    droptraining.to_csv('trainClean.csv')
-    dropvalid.to_csv('validationClean.csv')
-    # print(clean)
-    # clean.drop_data(100, 13)
+    newdata = MatUtil('./data/online_data.mat')
+
+    newdata.mat_to_csv()
+    # clean = CleanUtil('trainingData.csv').split_train_test(0.3)
+    # clean.drop_data(100, 13).to_csv('trainClean.csv')
+    # cleanvalid = CleanUtil('validationData.csv')
+    # cleanvalid.drop_data(100,13).to_csv('validationClean.csv')
+
