@@ -7,10 +7,11 @@ import os
 import numpy as np
 import h5py
 
-class CleanUtil:
-    def __init__(self, filename):
-        self.filename = './' + filename
-        self.df = pd.read_csv(self.filename)
+class KaggleDataUtil:
+    def __init__(self, filename = None):
+        if filename != None:
+            self.filename = './' + filename
+            self.df = pd.read_csv(self.filename)
 
     def split_train_test(self, ratio):
         """
@@ -23,8 +24,8 @@ class CleanUtil:
         if self.df is None:
             return None
         self.df = self.drop_data(100, 13)
-        x = self.df.drop(['SPACEID'], axis=1)
-        y = self.df.loc[:, 'SPACEID']
+        x = self.df.loc[:, 'ap1':'ap6']
+        y = self.df.loc[:, 'label']
         x.fillna(axis=0, method='ffill', inplace=True)
         y.fillna(axis=0, method='ffill', inplace=True)
         # x = preprocessing.normalize(x, norm='l2')
@@ -92,15 +93,16 @@ class CleanUtil:
 class MatUtil:
     filename = None
     dataset = None
-
-    def __init__(self,filename):
-        self.filename = filename
-        self.dataset = sio.loadmat(filename)
+    df = None
+    def __init__(self,filename = None):
+        if filename != None:
+            self.filename = filename
+            self.dataset = sio.loadmat(filename)
 
     def mat_to_csv(self):
         """
         change the format of data to csv and clean data
-        :return:
+        :return: csv file
         """
         lenthoffile = len(self.filename.split('_'))
         print("Processing :",self.filename)
@@ -135,15 +137,28 @@ class MatUtil:
         return new_df
 
     def SimpleVisulizeCoord(self,new_df):
+        """
+        visualize and color the dataframe
+        :param new_df:
+        :return: void
+        """
         x = new_df.x
         y = new_df.y
         plt.scatter(x=x, y=y, s=3, c=new_df.label)
+        plt.title(self.filename)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.show()
 
-
     def listrange(self,start_,stop_,gap,droprange):
+        """
+        Used to split the raw data into range
+        :param start_: start point of the whole range
+        :param stop_:  end point of the whole range
+        :param gap:     every gap drop some data
+        :param droprange: for each point we drop the data across it with range = droprange
+        :return:  droprange list
+        """
         res = []
         for x in range(start_,stop_,gap):
             for y in range(x-droprange,x+droprange,1):
@@ -151,9 +166,29 @@ class MatUtil:
         return res
 
     def labeldata(self,dataframe):
-        # print((dataframe.y)//20%10)
+        """
+        label data in a range with the same label
+        :param dataframe: the source dataframe should be labeled
+        :return:    dataframe with new label column
+        """
         dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) - (dataframe.y)//20%10)
         return dataframe
+
+def train_test_split_Mat(ratio):
+    """
+    shared train test split method apply on the mat datatype
+    :param ratio:
+    :return: a stochatic split data (dataframe)
+    """
+    df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
+    df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
+    df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+    df = df.dropna()
+    x = df.loc[:, 'ap1':'ap6']
+    x = pd.concat([x, df.label], axis=1)
+    y = df.loc[:, 'x':'y']
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
+    return X_train, X_test, y_train, y_test
 
 def createandlistdata():
     filelist = os.listdir('./data')
@@ -164,11 +199,15 @@ def createandlistdata():
         path = r'./newdata/'
         df.to_csv(path+filename+'.csv')
 
+
+
+
 # if __name__ == "__main__":
+#     createandlistdata()
     # newdata = MatUtil('./data/online_data.mat')
     # newdata.listrange(10,200,30,3)
     # newdata.mat_to_csv()
-    # createandlistdata()
+
     # clean = CleanUtil('trainingData.csv').split_train_test(0.3)
     # clean.drop_data(100, 13).to_csv('trainClean.csv')
     # cleanvalid = CleanUtil('validationData.csv')

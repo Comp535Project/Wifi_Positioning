@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C  # REF就是高斯核函数
 from mpl_toolkits.mplot3d import Axes3D  # 实现数据可视化3D
-from DataUtil import CleanUtil
+from DataUtil import KaggleDataUtil
 import time
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ class GPUtil:
     scores = []
 
     def train(self):
-        X_train, X_test, y_train, y_test = CleanUtil('testData.csv').split_train_test(0.3)
+        X_train, X_test, y_train, y_test = KaggleDataUtil('testData.csv').split_train_test(0.3)
         # X_train, X_test, y_train, y_test = CleanUtil('trainingData.csv').split_train_test(0.3)
         # 创建数据集
         # 核函数的取值

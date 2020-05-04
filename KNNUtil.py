@@ -2,15 +2,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from DataUtil import CleanUtil
-from DataUtil import MatUtil
+from DataUtil import KaggleDataUtil
+from DataUtil import train_test_split_Mat
 import matplotlib.pyplot as plt
 import time
 import pandas as pd
 
-"""
-cross validation - parameter fitting - data visualization
-"""
 
 class KNNUtil:
 
@@ -18,18 +15,10 @@ class KNNUtil:
         self.scores = []
         self.k = k
         self.k_range = range(1, k)
-        self.df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
-        self.df = pd.concat([self.df,MatUtil(r'./data/offline_data_random.mat').mat_to_csv()],axis=0)
 
 
     def train_test_split(self,ratio):
-
-        x = self.df.loc[:,'ap1':'ap6']
-        x = pd.concat([x,self.df.label],axis=1)
-        y = self.df.loc[:,'x':'y']
-        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
-        print(X_test)
-        print(y_test)
+        X_train, X_test, y_train, y_test = train_test_split_Mat(ratio)
         return X_train.to_numpy(), X_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 
 
@@ -70,8 +59,6 @@ class KNNUtil:
             y_pred[i] = np.mean(closest_y, axis=0)
         return y_pred
 
-        # 计算测试集中数据的预测坐标与真实坐标的欧式距离
-
     def compute_coordinate_dist(self, y_test, y_pred):
         """
         compute the distance between prediction coordinate and real coordinate
@@ -103,7 +90,6 @@ class KNNUtil:
             self.scores.append(accuracy)
             end = time.time()
             print("Complete time: " + str(end - start) + " Secs.")
-        self.plot_accuracy()
 
 
     def plot_accuracy(self):
@@ -121,17 +107,17 @@ class KNNUtil:
         plot the classification result from the scratch
         :return:
         """
-        X_train, X_test, y_train, y_test = CleanUtil(self.filename).split_train_test(0.4)
+        X_train, X_test, y_train, y_test = KaggleDataUtil(self.filename).split_train_test(0.4)
         # y_pred = self.KNNModel(self.k, X_train, y_train, X_test)
         # 也画出所有的训练集数据
         print(X_test)
         # plt.scatter(X_test[:,'LONGTITUDE'], X_test[:, 'LATITUDE'], c=y_test)
         # plt.show()
 
-
-if __name__ == "__main__":
-    knn = KNNUtil(3)
-    knn.classify()
+#
+# if __name__ == "__main__":
+#     knn = KNNUtil(3)
+#     knn.classify()
 
 
 

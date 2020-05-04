@@ -217,7 +217,7 @@ class GradientBoostingDecisionTree(AbstractModel):
 
 if __name__ == '__main__':
     # Load data
-    train_x, test_x, train_y, test_y = DataUtil.CleanUtil('trainingData.csv')
+    train_x, test_x, train_y, test_y = DataUtil.KaggleDataUtil('trainingData.csv')
 
     # Training
     svm_model = SVM()

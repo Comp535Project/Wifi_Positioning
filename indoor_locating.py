@@ -9,8 +9,8 @@ import scipy.io as sio
 import numpy as np
 
 # 数据集加载
-dataset = sio.loadmat('data/offline_data_uniform.mat')
-dataset1 = sio.loadmat('data/offline_data_random.mat')
+dataset = sio.loadmat('./data/offline_data_uniform.mat')
+dataset1 = sio.loadmat('./data/offline_data_random.mat')
 print(list(dataset1))
 #转换格式
 rss_for_test = np.array(dataset['offline_rss'])
