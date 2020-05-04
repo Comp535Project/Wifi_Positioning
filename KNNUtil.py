@@ -2,8 +2,10 @@ from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from DataUtil import CleanUtil
+from DataUtil import MatUtil
 import matplotlib.pyplot as plt
 import time
+import pandas as pd
 
 """
 cross validation - parameter fitting - data visualization
@@ -11,18 +13,28 @@ cross validation - parameter fitting - data visualization
 
 class KNNUtil:
 
-    def __init__(self, k, filename = 'trainingData.csv'):
+    def __init__(self, k):
         self.scores = []
         self.k = k
         self.k_range = range(1, k)
-        self.filename = filename
+
+
+    def train_test_split(self,ratio):
+        df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
+        df = pd.concat([df,MatUtil(r'./data/offline_data_random.mat').mat_to_csv()],axis=0)
+        print(df)
+
+        # rss_for_test = np.array(dataset['offline_rss'])
+        # rss_for_train = np.array(dataset1['offline_rss'])
+        # coordinate_for_test = np.array(dataset['offline_location'])
+        # coordinate_for_train = np.array(dataset1['offline_location'])
 
     def classify(self):
         """
         classify with knn,loop and find best K
         :return:None
         """
-        X_train, X_test, y_train, y_test = CleanUtil(self.filename).split_train_test(0.3)
+        X_train, X_test, y_train, y_test = self.train_test_split(0.3)
         for ki in self.k_range:
             print("k = " + str(ki) + " begin ")
             start = time.time()
@@ -63,9 +75,9 @@ class KNNUtil:
         # plt.show()
 
 
-# if __name__ == "__main__":
-#     knn = KNNUtil(3)
-#     knn.plot_result()
+if __name__ == "__main__":
+    knn = KNNUtil(3)
+    knn.train_test_split(0.3)
 
 
 

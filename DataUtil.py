@@ -118,7 +118,7 @@ class MatUtil:
         # print(new_df)
 
         # from 200 to 1750,gap250
-        selectedx = self.listrange(200,1750,250,30)
+        selectedx = self.listrange(200,2000,250,30)
         # from 200 to 1400
         selectedy = self.listrange(200,1400,200,30)
 
@@ -127,15 +127,17 @@ class MatUtil:
 
         new_df = self.labeldata(new_df)
 
-        # plot data
+        print(new_df.label)
 
+        # plot data
+        self.SimpleVisulizeCoord(new_df)
 
         return new_df
 
-    def simpleplot(self,new_df):
+    def SimpleVisulizeCoord(self,new_df):
         x = new_df.x
         y = new_df.y
-        plt.scatter(x=x, y=y, s=3)
+        plt.scatter(x=x, y=y, s=3, c=new_df.label)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.show()
@@ -149,10 +151,9 @@ class MatUtil:
         return res
 
     def labeldata(self,dataframe):
-        dataframe['label'] = dataframe.x/250 + dataframe.y/20
+        print((dataframe.y//20) & 0)
+        dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) & 0)
         return dataframe
-
-
 
 def createandlistdata():
     filelist = os.listdir('./data')
@@ -164,7 +165,7 @@ def createandlistdata():
         df.to_csv(path+filename+'.csv')
 
 if __name__ == "__main__":
-    newdata = MatUtil('./data/online_data.mat')
+    # newdata = MatUtil('./data/online_data.mat')
     # newdata.listrange(10,200,30,3)
     # newdata.mat_to_csv()
     createandlistdata()
