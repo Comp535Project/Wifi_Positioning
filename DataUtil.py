@@ -130,7 +130,7 @@ class MatUtil:
         # print(new_df.label)
 
         # plot data
-        self.SimpleVisulizeCoord(new_df)
+        # self.SimpleVisulizeCoord(new_df)
 
         return new_df
 
@@ -164,11 +164,11 @@ def createandlistdata():
         path = r'./newdata/'
         df.to_csv(path+filename+'.csv')
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # newdata = MatUtil('./data/online_data.mat')
     # newdata.listrange(10,200,30,3)
     # newdata.mat_to_csv()
-    createandlistdata()
+    # createandlistdata()
     # clean = CleanUtil('trainingData.csv').split_train_test(0.3)
     # clean.drop_data(100, 13).to_csv('trainClean.csv')
     # cleanvalid = CleanUtil('validationData.csv')
