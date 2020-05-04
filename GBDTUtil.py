@@ -8,43 +8,58 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from DataUtil import CleanUtil
 import matplotlib.pyplot as plt
 import time
+from sklearn.preprocessing import StandardScaler
+from DataUtil import MatUtil
 from sklearn import preprocessing
-
+from sklearn.model_selection import GridSearchCV
+from sklearn import preprocessing
 class GBDTUtil:
 
+
+
     # def __init__(self, filename = 'data/online_data.mat.csv'):
-    def __init__(self, filename = 'trainingData.csv'):
-
+    def __init__(self):
         self.scores = []
-        self.filename = filename
+        self.df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv_float32()
+        # self.df = pd.concat([self.df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv_float32()], axis=0)
+        # df.round({'A': 1, 'C': 2})
 
+    def train_test_split(self, ratio):
+        x = self.df.loc[:, 'ap1':'ap6']
+        # x = pd.concat([x, self.df.label], axis=1)
+        y = self.df.loc[:, 'label']
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
+        # print(x)
+        # print("++++++++++++++++++++++++++++++++")
+        # print(y)
+        # print("++++++++++++++++++++++++++++++++")
+        # print(X_train)
+        # print("++++++++++++++++++++++++++++++++")
+        # print(X_test)
+        # print("++++++++++++++++++++++++++++++++")
+        # print(y_train)
+        # print("++++++++++++++++++++++++++++++++")
+        # print(y_test)
+        return X_train.to_numpy(), X_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
     def classify(self):
-        print("start\n")
         # """
         # classify with knn,loop and find best K
         # :return:None
         # """
-        X_train, X_test, y_train, y_test = CleanUtil(self.filename).split_train_test(0.3)
-        # data = pd.read_csv(r"./data_train.csv")
-        # x_columns = []
-        # for x in data.columns:
-        #     if x not in ['id', 'label']:
-        #         x_columns.append(x)
-        # X = data[x_columns]
-        # y = data['label']
-        # x_train, x_test, y_train, y_test = train_test_split(X, y)
-        print("!!!!!!!!!!!!!!!!!!!!!!!\n")
-        # GradientBoostingClassifier(criterion='friedman_mse', init=None, learning_rate=0.5, loss='deviance', max_depth=3,
-        #                            max_features=None, max_leaf_nodes=None, min_impurity_decrease=0.0,
-        #                            min_impurity_split=None, min_samples_leaf=1, min_samples_split=2,
-        #                            min_weight_fraction_leaf=0.0, n_estimators=100, presort='auto', random_state=None,
-        #                            subsample=1.0, verbose=0, warm_start=False)
-        #
-        # gbr = GradientBoostingClassifier()
-        gbr = GradientBoostingClassifier(n_estimators=3000, max_depth=2, min_samples_split=2, learning_rate=0.1)
+        X_train, X_test, y_train, y_test = self.train_test_split(0.3)
+        # gbr = GradientBoostingClassifier(verbose = 1, n_estimators=100, max_depth=2, min_samples_split=2, learning_rate=0.2)
+        # gbr = GradientBoostingClassifier(verbose = 1, random_state=10)
         # gbr.fit(X_train, y_train.ravel())
-        print("!!!!!!!!!!!!!!!!!!!!!!!\n")
-        gbr.fit(X_train, y_train)
+        # gbr.fit(X_train, y_train)
+        param_test1 = {'n_estimators': range(20, 81, 10)}
+        gsearch1 = GridSearchCV(estimator=GradientBoostingClassifier(verbose = 1,
+                                                                     random_state=10),
+                                param_grid=param_test1,  iid=False, cv=5)
+        # y_train = preprocessing.label_binarize(y_train, classes=[0, 1, 2, 3])
+        gsearch1.fit(X_train, y_train)
+        gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+
+
         # joblib.dump(gbr, 'train_model_result4.m')  # 保存模型
 
         # y_gbr = gbr.predict(x_train)
@@ -53,10 +68,10 @@ class GBDTUtil:
         # acc_test = gbr.score(x_test, y_test)
         # print(acc_train)
         # print(acc_test)
-        y_pred = gbr.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        print(accuracy)
-        print("end\n")
+        # y_pred = gbr.predict(X_test)
+        # accuracy = accuracy_score(y_test, y_pred)
+        # print(accuracy)
+        # print("end\n")
     # def plot_accuracy(self):
     #     """
     #     plot accuracy graph
