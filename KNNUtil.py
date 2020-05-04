@@ -98,9 +98,15 @@ class KNNUtil:
             y_pred = self.predict_labels(distance,y_train,ki)
             coordinate_dist = self.compute_coordinate_dist(y_test,y_pred)
             correct_count = np.sum((coordinate_dist < 200) == True)
+
             total_count = y_test.shape[0]
             accuracy = float(correct_count) / total_count
-            self.scores.append(accuracy)
+            # self.scores.append(accuracy)
+            s = 0.0
+            num = y_test.shape[0]
+            for i in range(num):
+                s += coordinate_dist[i] * coordinate_dist[i]
+            self.scores.append(np.sqrt(s / num) / 100)
             end = time.time()
             print("Complete time: " + str(end - start) + " Secs.")
         self.plot_accuracy()
@@ -113,7 +119,7 @@ class KNNUtil:
         """
         plt.plot(self.k_range, self.scores)
         plt.xlabel('Value of K')
-        plt.ylabel('Testing accuracy')
+        plt.ylabel('Root-Mean-Square (m)')
         plt.show()
 
     def plot_result(self):
