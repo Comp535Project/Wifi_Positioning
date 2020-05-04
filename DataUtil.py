@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import scipy.io as sio
+import os
 import numpy as np
 import h5py
 
@@ -90,24 +91,73 @@ class CleanUtil:
 
 
 class MatUtil:
+    filename = None
+    dataset = None
 
     def __init__(self,filename):
         self.filename = filename
         self.dataset = sio.loadmat(filename)
 
     def mat_to_csv(self):
-        columns_ = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
+        """
+        change the format of data to csv and clean data
+        :return:
+        """
+        lenthoffile = len(self.filename.split('_'))
+        print(self.filename)
+        print(lenthoffile)
+        column_ = []
+        if lenthoffile > 2:
+            columns_ = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
+        else:
+            columns_ = ['x', 'y', 'ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6']
         features = pd.DataFrame(list(self.dataset.values())[-1])
         rss = pd.DataFrame(list(self.dataset.values())[-2])
         new_df = pd.concat([features,rss],axis=1)
         new_df.columns = columns_
-        new_df.to_csv(self.filename+'.csv')
+        # new_df.to_csv(self.filename+'.csv')
         # print(new_df)
+
+        # from 200 to 1750,gap250
+        selectedx = self.listrange(200,1750,250,30)
+        # from 200 to 1400
+        selectedy = self.listrange(200,1400,200,30)
+
+        new_df = new_df[~new_df['x'].isin(selectedx)]
+        new_df = new_df[~new_df['y'].isin(selectedy)]
+
+        # plot data
+        x = new_df.x
+        y = new_df.y
+        plt.scatter(x=x, y=y, s=3)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.show()
+
+        return new_df
+
+    def listrange(self,start_,stop_,gap,droprange):
+        res = []
+        for x in range(start_,stop_,gap):
+            for y in range(x-droprange,x+droprange,1):
+                res.append(y)
+        return res
+
+
+def createandlistdata():
+    filelist = os.listdir('./data')
+    for file in filelist:
+        filename = file.split('.')[0]
+        print(filename)
+        df = MatUtil('./data/'+file).mat_to_csv()
+        path = r'./newdata/'
+        df.to_csv(path+filename+'.csv')
 
 if __name__ == "__main__":
     newdata = MatUtil('./data/online_data.mat')
-
-    newdata.mat_to_csv()
+    # newdata.listrange(10,200,30,3)
+    # newdata.mat_to_csv()
+    createandlistdata()
     # clean = CleanUtil('trainingData.csv').split_train_test(0.3)
     # clean.drop_data(100, 13).to_csv('trainClean.csv')
     # cleanvalid = CleanUtil('validationData.csv')
