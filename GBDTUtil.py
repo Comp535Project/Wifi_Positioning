@@ -15,8 +15,6 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import preprocessing
 class GBDTUtil:
 
-
-
     # def __init__(self, filename = 'data/online_data.mat.csv'):
     def __init__(self):
         self.scores = []
@@ -27,8 +25,10 @@ class GBDTUtil:
     def train_test_split(self, ratio):
         x = self.df.loc[:, 'ap1':'ap6']
         # x = pd.concat([x, self.df.label], axis=1)
-        y = self.df.loc[:, 'label']
+        y = self.df.loc[:, 'label'].astype('int32')
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
+        # print(y)
+        # print(self.df)
         # print(x)
         # print("++++++++++++++++++++++++++++++++")
         # print(y)
@@ -48,16 +48,17 @@ class GBDTUtil:
         # """
         X_train, X_test, y_train, y_test = self.train_test_split(0.3)
         # gbr = GradientBoostingClassifier(verbose = 1, n_estimators=100, max_depth=2, min_samples_split=2, learning_rate=0.2)
-        # gbr = GradientBoostingClassifier(verbose = 1, random_state=10)
+        gbr = GradientBoostingClassifier(verbose = 1, random_state=10)
         # gbr.fit(X_train, y_train.ravel())
-        # gbr.fit(X_train, y_train)
-        param_test1 = {'n_estimators': range(20, 81, 10)}
-        gsearch1 = GridSearchCV(estimator=GradientBoostingClassifier(verbose = 1,
-                                                                     random_state=10),
-                                param_grid=param_test1,  iid=False, cv=5)
-        # y_train = preprocessing.label_binarize(y_train, classes=[0, 1, 2, 3])
-        gsearch1.fit(X_train, y_train)
-        gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+        # print(X_train)
+        print(y_train)
+        gbr.fit(X_train, y_train)
+        # param_test1 = {'n_estimators': range(20, 81, 10)}
+        # gsearch1 = GridSearchCV(estimator=GradientBoostingClassifier(verbose = 1,
+        #                                                              random_state=10),
+        #                         param_grid=param_test1,  iid=False, cv=5)
+        # # y_train = preprocessing.label_binarize(y_train, classes=[0, 1, 2, 3])
+        # gsearch1.fit(X_train, y_train)
 
 
         # joblib.dump(gbr, 'train_model_result4.m')  # 保存模型
@@ -68,9 +69,9 @@ class GBDTUtil:
         # acc_test = gbr.score(x_test, y_test)
         # print(acc_train)
         # print(acc_test)
-        # y_pred = gbr.predict(X_test)
-        # accuracy = accuracy_score(y_test, y_pred)
-        # print(accuracy)
+        y_pred = gbr.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        print(accuracy)
         # print("end\n")
     # def plot_accuracy(self):
     #     """
