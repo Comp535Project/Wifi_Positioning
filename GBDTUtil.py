@@ -33,7 +33,6 @@ class GBDTUtil:
         # X = data[x_columns]
         # y = data['label']
         # x_train, x_test, y_train, y_test = train_test_split(X, y)
-        # 模型训练，使用GBDT算法
         print("!!!!!!!!!!!!!!!!!!!!!!!\n")
         # GradientBoostingClassifier(criterion='friedman_mse', init=None, learning_rate=0.5, loss='deviance', max_depth=3,
         #                            max_features=None, max_leaf_nodes=None, min_impurity_decrease=0.0,

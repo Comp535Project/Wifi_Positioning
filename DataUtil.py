@@ -8,9 +8,8 @@ import numpy as np
 import h5py
 
 class CleanUtil:
-    baseURI = 'D:/RiceClass/535/Indoor/UJIndoorLoc/'
     def __init__(self, filename):
-        self.filename = self.baseURI + filename
+        self.filename = './' + filename
         self.df = pd.read_csv(self.filename)
 
     def split_train_test(self, ratio):
@@ -104,8 +103,8 @@ class MatUtil:
         :return:
         """
         lenthoffile = len(self.filename.split('_'))
-        print(self.filename)
-        print(lenthoffile)
+        print("Processing :",self.filename)
+        # print(lenthoffile)
         column_ = []
         if lenthoffile > 2:
             columns_ = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
@@ -126,7 +125,14 @@ class MatUtil:
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
 
+        new_df = self.labeldata(new_df)
+
         # plot data
+
+
+        return new_df
+
+    def simpleplot(self,new_df):
         x = new_df.x
         y = new_df.y
         plt.scatter(x=x, y=y, s=3)
@@ -134,7 +140,6 @@ class MatUtil:
         plt.ylabel('y')
         plt.show()
 
-        return new_df
 
     def listrange(self,start_,stop_,gap,droprange):
         res = []
@@ -143,12 +148,17 @@ class MatUtil:
                 res.append(y)
         return res
 
+    def labeldata(self,dataframe):
+        dataframe['label'] = dataframe.x/250 + dataframe.y/20
+        return dataframe
+
+
 
 def createandlistdata():
     filelist = os.listdir('./data')
     for file in filelist:
         filename = file.split('.')[0]
-        print(filename)
+        # print(filename)
         df = MatUtil('./data/'+file).mat_to_csv()
         path = r'./newdata/'
         df.to_csv(path+filename+'.csv')
