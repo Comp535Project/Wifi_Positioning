@@ -120,14 +120,14 @@ class MatUtil:
         # from 200 to 1750,gap250
         selectedx = self.listrange(200,2000,250,30)
         # from 200 to 1400
-        selectedy = self.listrange(200,1400,200,30)
+        selectedy = self.listrange(200,2000,200,30)
 
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
 
         new_df = self.labeldata(new_df)
 
-        print(new_df.label)
+        # print(new_df.label)
 
         # plot data
         self.SimpleVisulizeCoord(new_df)
@@ -151,8 +151,8 @@ class MatUtil:
         return res
 
     def labeldata(self,dataframe):
-        print((dataframe.y//20) & 0)
-        dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) & 0)
+        # print((dataframe.y)//20%10)
+        dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) - (dataframe.y)//20%10)
         return dataframe
 
 def createandlistdata():
