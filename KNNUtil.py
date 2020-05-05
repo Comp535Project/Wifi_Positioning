@@ -104,7 +104,7 @@ class KNNUtil:
         X_train, X_test, y_train, y_test  = self.train_test_split_knn(self.ratio)
         distance = self.compute_distances_no_loops(X_test,X_train)
 
-        lowest_error = +np.inf
+        lowest_error = 1000000
         best_ki = -1
 
         for ki in self.k_range:
@@ -123,13 +123,16 @@ class KNNUtil:
                 s += coordinate_dist[i] * coordinate_dist[i]
             rms_error = np.sqrt(s / num) / 100
             self.scores.append(rms_error)
-            print(lowest_error,rms_error)
-            if rms_error < lowest_error:
+            # print(lowest_error,type(rms_error))
+            if rms_error[0] < lowest_error:
                 best_ki = ki
+                lowest_error = rms_error[0]
             end = time.time()
             print("Complete time: " + str(end - start) + " Secs.")
 
-        print("The best k is ,",best_ki)
+        print("*"*30 + "KNN Finished" + "*"*30)
+        print("The best k is {}\n,The according rms error is {}".format(best_ki,lowest_error))
+
         self.plot_result(best_ki)
 
     def plot_accuracy(self):

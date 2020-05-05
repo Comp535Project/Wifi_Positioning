@@ -22,10 +22,10 @@ class MatRandomForest:
         self.modelpath = modelpath
         self.model = du.loadModel(modelpath)
         if (self.model == None):
-            print("Firsttime usage,GridSearch for parameters")
+            print("first time usage of RandomForest model,GridSearch for parameters")
             self.model = self.GridSearchRandomForest()
         else:
-            print("RandomForest Model Finished..")
+            print("RandomForest Model Loaded Finished..")
 
     def train_test_split_rf_with_single_label(self, ratio):
         """
