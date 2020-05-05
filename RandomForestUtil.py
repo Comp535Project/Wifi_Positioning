@@ -7,15 +7,25 @@ from sklearn.metrics import r2_score
 import DataUtil as du
 
 
+"""
+File Constant
+"""
+PREDICT_BY_LABEL = 1
+PREDICT_BY_COORINATE = 2
+
+
+
 class MatRandomForest:
     model = None
     modelpath = None
+    tickle = None
 
-    def __init__(self, modelpath):
+    def __init__(self, modelpath,tickle = PREDICT_BY_LABEL):
         """
         caller for the RandomForestUtil
         :return:
         """
+        self.tickle = tickle
         self.modelpath = modelpath
         self.model = du.loadModel(modelpath)
         if (self.model == None):
@@ -56,8 +66,11 @@ class MatRandomForest:
         """
 
         # configureable
-        # X_train, X_test, y_train, y_test = self.train_test_split_rf_with_coordinate(0.3)
-        X_train, X_test, y_train, y_test = self.train_test_split_rf_with_single_label(0.3)
+        if self.tickle == PREDICT_BY_LABEL:
+            X_train, X_test, y_train, y_test = self.train_test_split_rf_with_single_label(0.3)
+        elif self.tickle == PREDICT_BY_COORINATE:
+            X_train, X_test, y_train, y_test = self.train_test_split_rf_with_coordinate(0.3)
+
 
         rf = RandomForestRegressor(random_state=42)
         param_grid = {
@@ -91,30 +104,49 @@ class MatRandomForest:
                                        criterion=dictionary['criterion'])
         return bestrf
 
-    def LabelDataByRandomForest(self, filpath):
+    def LabelDataByRandomForest(self, df, tickle = tickle):
         """
         label the csv filepath with randomforest result
+        :param tickle:
         :param filpath: the csv file path e.g. ./newdata/offline_data_random.csv
         :return: dataframe with new column
         """
-
-        df = pd.read_csv(filpath)
         X = df.loc[:, 'ap1':'ap6']
+
         y_pred = self.model.predict(X)
         y_pred_int = np.rint(y_pred)
-        # label method one - by directly refract integer from float
-        df['rf_label_direct'] = y_pred_int.astype(int)
 
-        # label method two - by refract result based on hte predicted coord
-        print(y_pred_int)
-        # df['label'] = (df.x // 240) + ((dataframe.y // 20) - (dataframe.y) // 20 % 10)
-        # print(df)
+        if tickle == PREDICT_BY_LABEL:
+            # label method one - by directly refract integer from float
+            df['rf_label_direct'] = y_pred_int.astype(int)
+            print("Accuracy_Score for rf_label_direct: ", accuracy_score(df['rf_label_direct'], df['label']))
 
+        elif tickle == PREDICT_BY_COORINATE:
+            # label method two - by refract result based on hte predicted coord
+            rf_label_coord = ((y_pred_int[:, 0] // 240) + ((y_pred_int[:, 1] // 20) - y_pred_int[:, 1] // 20 % 10))
+            df['rf_label_coord'] = rf_label_coord.astype(int)
+            print("R2_Score for rf_label_coord: ",r2_score(y_pred_int,df.loc[:,'x':'y']))
+            print("Accuracy_Score for rf_label_coord: ", accuracy_score(df['rf_label_coord'], df['label']))
 
-        # print(accuracy_score(df['rf_label_direct'],df['label']))
         return df
 
 
+
+def mergeLabeling(filepath):
+    """
+    filepath is the target file path
+    :param filepath: e.g. './newdata/offline_data_random.csv'
+    :return:
+    """
+    df = pd.read_csv(filepath)
+    df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+    df = df.dropna()
+    LabelClassifier = MatRandomForest("./models/rfmodel.sav", PREDICT_BY_LABEL)
+    CoordClassifier = MatRandomForest("./models/rfmodel_coordinate.sav", PREDICT_BY_COORINATE)
+    df = LabelClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_LABEL)
+    df = CoordClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_COORINATE)
+    print(df)
+    return df
+
 if __name__ == "__main__":
-    rfr = MatRandomForest("./models/rfmodel_coordinate.sav")
-    rfr.LabelDataByRandomForest('./newdata/offline_data_random.csv')
+    mergeLabeling('./newdata/offline_data_random.csv')
