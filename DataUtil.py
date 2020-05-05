@@ -128,7 +128,7 @@ class MatUtil:
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
 
-        new_df = self.labeldata(new_df)
+        new_df = labeldata(new_df)
 
         # print(new_df.label)
 
@@ -165,7 +165,7 @@ class MatUtil:
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
 
-        new_df = self.labeldata(new_df)
+        new_df = labeldata(new_df)
 
         # print(new_df.label)
 
@@ -204,16 +204,16 @@ class MatUtil:
                 res.append(y)
         return res
 
-    def labeldata(self,dataframe):
-        """
-        label data in a range with the same label
-        :param dataframe: the source dataframe should be labeled
-        :return:    dataframe with new label column
-        """
-        dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) - (dataframe.y)//20%10)
-        # print((dataframe.y)//20%10)
-        # dataframe['label'] = (dataframe.x//480) + ((dataframe.y//40) - (dataframe.y)//40%10)
-        return dataframe
+def labeldata(dataframe):
+    """
+    label data in a range with the same label
+    :param dataframe: the source dataframe should be labeled
+    :return:    dataframe with new label column
+    """
+    dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) - (dataframe.y)//20%10)
+    # print((dataframe.y)//20%10)
+    # dataframe['label'] = (dataframe.x//480) + ((dataframe.y//40) - (dataframe.y)//40%10)
+    return dataframe
 
 def prepare_Mat():
     """
@@ -259,7 +259,12 @@ def loadModel(filepath):
     :param filepath: load path
     :return: model obj
     """
-    return pickle.load(open(filepath,'rb'))
+    try:
+        file = open(filepath,'rb')
+        return pickle.load(open(filepath,'rb'))
+    except FileNotFoundError as e:
+        print(e.errno)
+        return None
 
 
 

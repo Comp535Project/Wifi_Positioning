@@ -4,36 +4,48 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import r2_score
-from DataUtil import prepare_Mat
-from DataUtil import saveModel
-from DataUtil import loadModel
+import DataUtil as du
 
 
 class MatRandomForest:
     model = None
+    modelpath = None
 
-    def __init__(self):
+    def __init__(self, modelpath):
         """
         caller for the RandomForestUtil
         :return:
         """
-        self.model = loadModel("./models/rfmodel.sav")
+        self.modelpath = modelpath
+        self.model = du.loadModel(modelpath)
         if (self.model == None):
             print("Firsttime usage,GridSearch for parameters")
             self.model = self.GridSearchRandomForest()
         else:
             print("Finished..")
 
-    def train_test_split_rf(self, ratio):
+    def train_test_split_rf_with_single_label(self, ratio):
         """
         shared train test split method apply on the mat datatype
         :param ratio:
         :return: a stochatic split data (dataframe)
         """
-        df = prepare_Mat()
+        df = du.prepare_Mat()
         x = df.loc[:, 'ap1':'ap6']
         # x = pd.concat([x, df.label], axis=1)
         y = df.label
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
+        return X_train, X_test, y_train, y_test
+
+    def train_test_split_rf_with_coordinate(self, ratio):
+        """
+        [x,y] used for y label
+        :param ratio:
+        :return: similar to above
+        """
+        df = du.prepare_Mat()
+        x = df.loc[:, 'ap1':'ap6']
+        y = df.loc[:, 'x':'y']
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
         return X_train, X_test, y_train, y_test
 
@@ -42,7 +54,11 @@ class MatRandomForest:
         GridSearch template for RandomForest
         :return:classifier , prediction value
         """
-        X_train, X_test, y_train, y_test = self.train_test_split_rf(0.3)
+
+        # configureable
+        # X_train, X_test, y_train, y_test = self.train_test_split_rf_with_coordinate(0.3)
+        X_train, X_test, y_train, y_test = self.train_test_split_rf_with_single_label(0.3)
+
         rf = RandomForestRegressor(random_state=42)
         param_grid = {
             'n_estimators': [10, 60, 100],
@@ -59,7 +75,7 @@ class MatRandomForest:
         y_pred = bestrf.predict(X_test)
         # print("label prediction is :",y_pred)
         print(f"r2 score: {r2_score(y_test, y_pred, multioutput='uniform_average')}\n")
-        saveModel(bestrf, "./models/rfmodel.sav")
+        du.saveModel(bestrf, self.modelpath)
         return bestrf
 
     def UseBestRandomForest(self, dictionary):
@@ -81,18 +97,24 @@ class MatRandomForest:
         :param filpath: the csv file path e.g. ./newdata/offline_data_random.csv
         :return: dataframe with new column
         """
+
         df = pd.read_csv(filpath)
         X = df.loc[:, 'ap1':'ap6']
-        # X_train, X_test, y_train, y_test = self.train_test_split_rf(0.3)
-        # self.model.fit(X_train, y_train)
-        # saveModel(self.model,"./models/rfmodel.sav")
-        # print(self.model)
         y_pred = self.model.predict(X)
         y_pred_int = np.rint(y_pred)
+        # label method one - by directly refract integer from float
         df['rf_label_direct'] = y_pred_int.astype(int)
+
+        # label method two - by refract result based on hte predicted coord
+        print(y_pred_int)
+        # df['label'] = (df.x // 240) + ((dataframe.y // 20) - (dataframe.y) // 20 % 10)
+        # print(df)
+
+
+        # print(accuracy_score(df['rf_label_direct'],df['label']))
         return df
 
 
 if __name__ == "__main__":
-    rfr = MatRandomForest()
+    rfr = MatRandomForest("./models/rfmodel_coordinate.sav")
     rfr.LabelDataByRandomForest('./newdata/offline_data_random.csv')
