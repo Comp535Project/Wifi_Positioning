@@ -1,15 +1,15 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import scipy.io as sio
 import os
 import numpy as np
-import h5py
 import pickle
 from ProjectConstant import *
+
+
 class KaggleDataUtil:
-    def __init__(self, filename = None):
+    def __init__(self, filename=None):
         if filename != None:
             self.filename = './' + filename
             self.df = pd.read_csv(self.filename)
@@ -41,7 +41,6 @@ class KaggleDataUtil:
 
     def normalize_data(self):
         pass
-
 
     def drop_data(self, columncount, rowcount):
         """
@@ -84,7 +83,8 @@ class KaggleDataUtil:
         shapetemplate = "This file has shape of {} \n" \
                         "the info is :\n {} \n"
         headertemplate = "The header of file includes: \n {0}"
-        template = shapetemplate.format(self.df.shape, self.df.info(verbose=True)) + headertemplate.format(self.df.head())
+        template = shapetemplate.format(self.df.shape, self.df.info(verbose=True)) + headertemplate.format(
+            self.df.head())
         return template
 
     def __repr__(self):
@@ -95,8 +95,9 @@ class MatUtil:
     filename = None
     dataset = None
     df = None
-    def __init__(self,filename = None):
-        if filename != None:
+
+    def __init__(self, filename=None):
+        if filename is not None:
             self.filename = filename
             self.dataset = sio.loadmat(filename)
 
@@ -106,7 +107,7 @@ class MatUtil:
         :return: csv file
         """
         lenthoffile = len(self.filename.split('_'))
-        print("Processing :",self.filename)
+        print("Processing :", self.filename)
         # print(lenthoffile)
         column_ = []
         if lenthoffile > 2:
@@ -115,15 +116,15 @@ class MatUtil:
             columns_ = ['x', 'y', 'ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6']
         features = pd.DataFrame(list(self.dataset.values())[-1])
         rss = pd.DataFrame(list(self.dataset.values())[-2])
-        new_df = pd.concat([features,rss],axis=1)
+        new_df = pd.concat([features, rss], axis=1)
         new_df.columns = columns_
         # new_df.to_csv(self.filename+'.csv')
         # print(new_df)
 
         # from 200 to 1750,gap250
-        selectedx = self.listrange(200,2000,250,30)
+        selectedx = self.listrange(200, 2000, 250, 30)
         # from 200 to 1400
-        selectedy = self.listrange(200,2000,200,30)
+        selectedy = self.listrange(200, 2000, 200, 30)
 
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
@@ -143,7 +144,7 @@ class MatUtil:
         :return:
         """
         lenthoffile = len(self.filename.split('_'))
-        print("Processing :",self.filename)
+        print("Processing :", self.filename)
         # print(lenthoffile)
         column_ = []
         if lenthoffile > 2:
@@ -152,15 +153,15 @@ class MatUtil:
             columns_ = ['x', 'y', 'ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6']
         features = pd.DataFrame(list(self.dataset.values())[-1])
         rss = pd.DataFrame(list(self.dataset.values())[-2])
-        new_df = pd.concat([features,rss],axis=1)
+        new_df = pd.concat([features, rss], axis=1)
         new_df.columns = columns_
         # new_df.to_csv(self.filename+'.csv')
         # print(new_df)
 
         # from 200 to 1750,gap250
-        selectedx = self.listrange(200,2000,250,30)
+        selectedx = self.listrange(200, 2000, 250, 30)
         # from 200 to 1400
-        selectedy = self.listrange(200,2000,200,30)
+        selectedy = self.listrange(200, 2000, 200, 30)
 
         new_df = new_df[~new_df['x'].isin(selectedx)]
         new_df = new_df[~new_df['y'].isin(selectedy)]
@@ -175,7 +176,7 @@ class MatUtil:
         new_df = new_df.dropna()
         return new_df.astype(np.float32)
 
-    def listrange(self,start_,stop_,gap,droprange):
+    def listrange(self, start_, stop_, gap, droprange):
         """
         Used to split the raw data into range
         :param start_: start point of the whole range
@@ -185,12 +186,13 @@ class MatUtil:
         :return:  droprange list
         """
         res = []
-        for x in range(start_,stop_,gap):
-            for y in range(x-droprange,x+droprange,1):
+        for x in range(start_, stop_, gap):
+            for y in range(x - droprange, x + droprange, 1):
                 res.append(y)
         return res
 
-def SimpleVisulizeCoord(new_df,based_label):
+
+def SimpleVisulizeCoord(new_df, based_label, k=None):
     """
     visualize and color the dataframe
     :param new_df:
@@ -204,10 +206,16 @@ def SimpleVisulizeCoord(new_df,based_label):
         plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_direct)
     elif based_label == PREDICT_BY_COORDINATE:
         plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_coord)
-    plt.title(based_label)
+
+    if k is None:
+        plt.title(based_label)
+    else:
+        titlestr = KNN_BEST_K_RESULT + str(k)
+        plt.title(titlestr)
     plt.xlabel('x')
     plt.ylabel('y')
     plt.show()
+
 
 def labeldata(dataframe):
     """
@@ -215,12 +223,13 @@ def labeldata(dataframe):
     :param dataframe: the source dataframe should be labeled
     :return:    dataframe with new label column
     """
-    dataframe['label'] = (dataframe.x//240) + ((dataframe.y//20) - (dataframe.y)//20%10)
+    dataframe['label'] = (dataframe.x // 240) + ((dataframe.y // 20) - (dataframe.y) // 20 % 10)
     # print((dataframe.y)//20%10)
     # dataframe['label'] = (dataframe.x//480) + ((dataframe.y//40) - (dataframe.y)//40%10)
     return dataframe
 
-def prepare_Mat():
+
+def prepare_Mat(fraction=1):
     """
     shared method apply on the mat datatype
     :return: dataframe finsihed splitting
@@ -231,12 +240,13 @@ def prepare_Mat():
     # df = df.sample(frac=0.5,replace=True,random_state=1)
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
-    df = df.sample(frac=0.3,replace=True,random_state=1)
+    df = df.sample(frac=fraction, replace=True, random_state=1)
 
-    SimpleVisulizeCoord(df,ORIGINAL_LABEL)
-    print("prepare_Mat size: ",df.shape)
+    SimpleVisulizeCoord(df, ORIGINAL_LABEL)
+    print("prepare_Mat size: ", df.shape)
 
     return df
+
 
 def createandlistdata():
     """
@@ -247,19 +257,20 @@ def createandlistdata():
     for file in filelist:
         filename = file.split('.')[0]
         # print(filename)
-        df = MatUtil('./data/'+file).mat_to_csv()
+        df = MatUtil('./data/' + file).mat_to_csv()
         path = r'./newdata/'
-        df.to_csv(path+filename+'.csv')
+        df.to_csv(path + filename + '.csv')
 
 
-def saveModel(model,filepath):
+def saveModel(model, filepath):
     """
     serialize model with pickle
     :param Object: model
     :param filepath: save path
     :return: void
     """
-    pickle.dump(model,open(filepath,'wb'))
+    pickle.dump(model, open(filepath, 'wb'))
+
 
 def loadModel(filepath):
     """
@@ -268,28 +279,25 @@ def loadModel(filepath):
     :return: model obj
     """
     try:
-        file = open(filepath,'rb')
-        return pickle.load(open(filepath,'rb'))
+        file = open(filepath, 'rb')
+        return pickle.load(open(filepath, 'rb'))
     except FileNotFoundError as fnfe:
-        print("Filenot found at DataUtil.loadModel",fnfe.errno)
+        print("Filenot found at DataUtil.loadModel", fnfe.errno)
         return None
     except IOError as ioe:
-        print("IO error happens at DataUtil.loadModel",ioe)
+        print("IO error happens at DataUtil.loadModel", ioe)
         return None
     except Exception as e:
-        print("Something happens at DataUtil.loadModel",e)
+        print("Something happens at DataUtil.loadModel", e)
         return None
-
-
 
 # if __name__ == "__main__":
 #     createandlistdata()
-    # newdata = MatUtil('./data/online_data.mat')
-    # newdata.listrange(10,200,30,3)
-    # newdata.mat_to_csv()
+# newdata = MatUtil('./data/online_data.mat')
+# newdata.listrange(10,200,30,3)
+# newdata.mat_to_csv()
 
-    # clean = CleanUtil('trainingData.csv').split_train_test(0.3)
-    # clean.drop_data(100, 13).to_csv('trainClean.csv')
-    # cleanvalid = CleanUtil('validationData.csv')
-    # cleanvalid.drop_data(100,13).to_csv('validationClean.csv')
-
+# clean = CleanUtil('trainingData.csv').split_train_test(0.3)
+# clean.drop_data(100, 13).to_csv('trainClean.csv')
+# cleanvalid = CleanUtil('validationData.csv')
+# cleanvalid.drop_data(100,13).to_csv('validationClean.csv')

@@ -1,26 +1,37 @@
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from DataUtil import KaggleDataUtil
 from DataUtil import prepare_Mat
+from DataUtil import SimpleVisulizeCoord
 import matplotlib.pyplot as plt
 import time
 import pandas as pd
 from ProjectConstant import *
 from RandomForestUtil import mergeLabeling
+
+
 class KNNUtil:
 
-    def __init__(self, k, ratio,based_label):
+    def __init__(self, k, ratio,based_label,fraction):
+        """
+        init function for the KNN model
+        :param k:the largest k needed for consideration
+        :param ratio: how much data you want to split for test,normally it is set to 0.3
+        :param based_label:refer this params to ProjectConstant,it symbolizes which label you want to use that come
+                           from random forest,choices includes PREDICT_BY_LABEL and PREDICT_BY_COORDINATE
+        :param fraction: it's used for importing and preprocessing data,we take sample of raw data for convience of computation,
+                         normally we set it to 1,if your laptop could hold the size of matrix,when you get MemoryError,
+                         set it to a lower value.
+        """
         self.scores = []
         self.k = k
         self.k_range = range(1, k)
         self.ratio = ratio
         self.basedLabel = based_label
+        self.fraction = fraction
 
 
     def train_test_split_knn(self,ratio):
-        df = prepare_Mat()
+        df = prepare_Mat(self.fraction)
         df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
         df = df.dropna()
         df = mergeLabeling(df,ratio)
@@ -47,6 +58,7 @@ class KNNUtil:
         test_sum = np.sum(np.square(X_test), axis=1)
         train_sum = np.sum(np.square(X_train), axis=1)
         inner_product = np.dot(X_test, X_train.T)
+
         dists = np.sqrt(-2 * inner_product + test_sum.reshape(-1, 1) + train_sum)
         return dists
 
@@ -88,8 +100,13 @@ class KNNUtil:
         classify with knn,loop and find best K
         :return:None
         """
-        X_train, X_test, y_train, y_test = self.train_test_split_knn(self.ratio)
+        global X_train, X_test, y_train, y_test
+        X_train, X_test, y_train, y_test  = self.train_test_split_knn(self.ratio)
         distance = self.compute_distances_no_loops(X_test,X_train)
+
+        lowest_error = +np.inf
+        best_ki = -1
+
         for ki in self.k_range:
             print("k = " + str(ki) + " begin ")
             start = time.time()
@@ -104,10 +121,16 @@ class KNNUtil:
             num = y_test.shape[0]
             for i in range(num):
                 s += coordinate_dist[i] * coordinate_dist[i]
-            self.scores.append(np.sqrt(s / num) / 100)
+            rms_error = np.sqrt(s / num) / 100
+            self.scores.append(rms_error)
+            print(lowest_error,rms_error)
+            if rms_error < lowest_error:
+                best_ki = ki
             end = time.time()
             print("Complete time: " + str(end - start) + " Secs.")
 
+        print("The best k is ,",best_ki)
+        self.plot_result(best_ki)
 
     def plot_accuracy(self):
         """
@@ -119,17 +142,26 @@ class KNNUtil:
         plt.ylabel('Root-Mean-Square (m)')
         plt.show()
 
-    def plot_result(self):
+    def plot_result(self,k):
+
         """
         plot the classification result from the scratch
         :return:
         """
-        X_train, X_test, y_train, y_test = KaggleDataUtil(self.filename).split_train_test(0.4)
-        # y_pred = self.KNNModel(self.k, X_train, y_train, X_test)
-        # 也画出所有的训练集数据
-        print(X_test)
-        # plt.scatter(X_test[:,'LONGTITUDE'], X_test[:, 'LATITUDE'], c=y_test)
-        # plt.show()
+
+        if k == -1:
+            print("there is something wrong with k:",k)
+            raise Exception("wrong k!!")
+
+        distance = self.compute_distances_no_loops(X_test, X_train)
+        y_pred = self.predict_labels(distance, y_train, 5)
+        frame2 = pd.DataFrame(y_pred)
+        frame1 = pd.DataFrame(X_test)
+        frame1 = pd.concat([frame1, frame2], axis=1)
+        frame1.columns = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6','label', 'x', 'y']
+        frame1['label'] = (frame1.x // 240) + ((frame1.y // 20) - frame1.y // 20 % 10)
+
+        SimpleVisulizeCoord(frame1, ORIGINAL_LABEL,k)
 
 
 def plot_best_knn(based_label,best_k):

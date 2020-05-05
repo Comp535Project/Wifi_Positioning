@@ -1,14 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import r2_score
 import DataUtil as du
 from ProjectConstant import *
-
-
-
 
 
 class MatRandomForest:
@@ -29,7 +25,7 @@ class MatRandomForest:
             print("Firsttime usage,GridSearch for parameters")
             self.model = self.GridSearchRandomForest()
         else:
-            print("Finished..")
+            print("RandomForest Model Finished..")
 
     def train_test_split_rf_with_single_label(self, ratio):
         """
@@ -133,6 +129,7 @@ class MatRandomForest:
 
         return df
 
+
 def mergeLabeling(df,ratio):
     """
     generate new dataframe based on randomforest
@@ -142,20 +139,20 @@ def mergeLabeling(df,ratio):
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
     LabelClassifier = MatRandomForest("./models/rfmodel.sav", PREDICT_BY_LABEL,ratio)
-    print("*" * 80)
-    print("LabelClassifier Parameters: ",LabelClassifier.model)
-    print("*" * 80)
+    # print("*" * 80)
+    # print("LabelClassifier Parameters: ",LabelClassifier.model)
+    # print("*" * 80)
     CoordClassifier = MatRandomForest("./models/rfmodel_coordinate.sav", PREDICT_BY_COORDINATE,ratio)
-    print("*" * 80)
-    print("CoordClassifier Parameters: ",CoordClassifier.model)
-    print("*" * 80)
+    # print("*" * 80)
+    # print("CoordClassifier Parameters: ",CoordClassifier.model)
+    # print("*" * 80)
     df = LabelClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_LABEL)
     df = CoordClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_COORDINATE)
     # print(df.head)
     return df
 
-if __name__ == "__main__":
-    df = pd.read_csv("./newdata/offline_data_random.csv")
-    df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
-    df = df.dropna()
-    mergeLabeling(df, 0.3)
+# if __name__ == "__main__":
+#     df = pd.read_csv("./newdata/offline_data_random.csv")
+#     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+#     df = df.dropna()
+#     mergeLabeling(df, 0.3)
