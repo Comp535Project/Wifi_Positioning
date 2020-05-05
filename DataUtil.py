@@ -6,6 +6,7 @@ import scipy.io as sio
 import os
 import numpy as np
 import h5py
+import pickle
 
 class KaggleDataUtil:
     def __init__(self, filename = None):
@@ -214,21 +215,20 @@ class MatUtil:
         # dataframe['label'] = (dataframe.x//480) + ((dataframe.y//40) - (dataframe.y)//40%10)
         return dataframe
 
-def train_test_split_Mat(ratio):
+def prepare_Mat():
     """
-    shared train test split method apply on the mat datatype
-    :param ratio:
-    :return: a stochatic split data (dataframe)
+    shared method apply on the mat datatype
+    :return: dataframe finsihed splitting
     """
     df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
+    df.sample(frac=0.5,replace=True,random_state=1)
     df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
+    df.sample(frac=0.5,replace=True,random_state=1)
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
-    x = df.loc[:, 'ap1':'ap6']
-    x = pd.concat([x, df.label], axis=1)
-    y = df.loc[:, 'x':'y']
-    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
-    return X_train, X_test, y_train, y_test
+    df.sample(frac=0.5,replace=True,random_state=1)
+
+    return df
 
 def createandlistdata():
     filelist = os.listdir('./data')
@@ -239,6 +239,23 @@ def createandlistdata():
         path = r'./newdata/'
         df.to_csv(path+filename+'.csv')
 
+
+def saveModel(model,filename):
+    """
+    serialize model with pickle
+    :param Object: model
+    :param file save path
+    :return: void
+    """
+    pickle.dump(model,open(filename,'wb'))
+
+def loadModel(filename):
+    """
+    deserialize model with pikle -  sklearn model
+    :param
+    :return: model obj
+    """
+    return pickle.load(open(filename,'rb'))
 
 
 

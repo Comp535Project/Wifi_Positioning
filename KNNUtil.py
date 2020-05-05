@@ -3,7 +3,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from DataUtil import KaggleDataUtil
-from DataUtil import train_test_split_Mat
+from DataUtil import prepare_Mat
 import matplotlib.pyplot as plt
 import time
 import pandas as pd
@@ -17,8 +17,12 @@ class KNNUtil:
         self.k_range = range(1, k)
 
 
-    def train_test_split(self,ratio):
-        X_train, X_test, y_train, y_test = train_test_split_Mat(ratio)
+    def train_test_split_knn(self,ratio):
+        df = prepare_Mat();
+        x = df.loc[:, 'ap1':'ap6']
+        x = pd.concat([x, df.label], axis=1)
+        y = df.loc[:, 'x':'y']
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
         return X_train.to_numpy(), X_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 
 
@@ -47,7 +51,6 @@ class KNNUtil:
         :param k: k nearest neighbors
         :return: y_pred: prediction of y
         """
-
         num_test = dists.shape[0]
         y_pred = np.zeros((num_test, 2))
         for i in range(num_test):
