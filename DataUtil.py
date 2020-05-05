@@ -231,6 +231,10 @@ def prepare_Mat():
     return df
 
 def createandlistdata():
+    """
+    used to batch generate new data from mat to csv
+    :return:
+    """
     filelist = os.listdir('./data')
     for file in filelist:
         filename = file.split('.')[0]
@@ -240,22 +244,22 @@ def createandlistdata():
         df.to_csv(path+filename+'.csv')
 
 
-def saveModel(model,filename):
+def saveModel(model,filepath):
     """
     serialize model with pickle
     :param Object: model
-    :param file save path
+    :param filepath: save path
     :return: void
     """
-    pickle.dump(model,open(filename,'wb'))
+    pickle.dump(model,open(filepath,'wb'))
 
-def loadModel(filename):
+def loadModel(filepath):
     """
     deserialize model with pikle -  sklearn model
-    :param
+    :param filepath: load path
     :return: model obj
     """
-    return pickle.load(open(filename,'rb'))
+    return pickle.load(open(filepath,'rb'))
 
 
 
