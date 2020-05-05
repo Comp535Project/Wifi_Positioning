@@ -66,6 +66,7 @@ class MatRandomForest:
         """
 
         # configureable
+        global X_train, y_train, X_test, y_test
         if self.tickle == PREDICT_BY_LABEL:
             X_train, X_test, y_train, y_test = self.train_test_split_rf_with_single_label(0.3)
         elif self.tickle == PREDICT_BY_COORINATE:
@@ -119,18 +120,19 @@ class MatRandomForest:
         if tickle == PREDICT_BY_LABEL:
             # label method one - by directly refract integer from float
             df['rf_label_direct'] = y_pred_int.astype(int)
-            print("Accuracy_Score for rf_label_direct: ", accuracy_score(df['rf_label_direct'], df['label']))
+            # print("Accuracy_Score for rf_label_direct: ", accuracy_score(df['rf_label_direct'], df['label']))
+            print("R2_Score for rf_label_direct: ",r2_score(y_pred_int,df.label))
 
         elif tickle == PREDICT_BY_COORINATE:
             # label method two - by refract result based on hte predicted coord
-            rf_label_coord = ((y_pred_int[:, 0] // 240) + ((y_pred_int[:, 1] // 20) - y_pred_int[:, 1] // 20 % 10))
-            df['rf_label_coord'] = rf_label_coord.astype(int)
-            print("R2_Score for rf_label_coord: ",r2_score(y_pred_int,df.loc[:,'x':'y']))
-            print("Accuracy_Score for rf_label_coord: ", accuracy_score(df['rf_label_coord'], df['label']))
+            df_y_pred_int = pd.DataFrame(y_pred_int,columns=['x','y'])
+            df['rf_label_coord'] = (df_y_pred_int.x // 240) + ((df_y_pred_int.y // 20) - (df_y_pred_int.y) // 20 % 10)
+            # rf_label_coord = ((y_pred_int[:, 0] // 240) + ((y_pred_int[:, 1] // 20) - y_pred_int[:, 1] // 20 % 10))
+            df['rf_label_coord'] = df['rf_label_coord'].astype(int)
+            # print("Accuracy_Score for rf_label_coord: ", accuracy_score(df['rf_label_coord'], df['label']))
+            print("R2_Score for rf_label_coord: ", r2_score(y_pred_int, df.loc[:, 'x':'y']))
 
         return df
-
-
 
 def mergeLabeling(filepath):
     """
@@ -142,10 +144,16 @@ def mergeLabeling(filepath):
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
     LabelClassifier = MatRandomForest("./models/rfmodel.sav", PREDICT_BY_LABEL)
+    print("*" * 20)
+    print("LabelClassifier Parameters: ",LabelClassifier.model)
+    print("*" * 20)
     CoordClassifier = MatRandomForest("./models/rfmodel_coordinate.sav", PREDICT_BY_COORINATE)
+    print("*" * 20)
+    print("CoordClassifier Parameters: ",CoordClassifier.model)
+    print("*" * 20)
     df = LabelClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_LABEL)
     df = CoordClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_COORINATE)
-    print(df)
+    # print(df)
     return df
 
 if __name__ == "__main__":

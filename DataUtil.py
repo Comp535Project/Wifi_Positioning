@@ -262,8 +262,14 @@ def loadModel(filepath):
     try:
         file = open(filepath,'rb')
         return pickle.load(open(filepath,'rb'))
-    except FileNotFoundError as e:
-        print(e.errno)
+    except FileNotFoundError as fnfe:
+        print("Filenot found at DataUtil.loadModel",fnfe.errno)
+        return None
+    except IOError as ioe:
+        print("IO error happens at DataUtil.loadModel",ioe)
+        return None
+    except Exception as e:
+        print("Something happens at DataUtil.loadModel",e)
         return None
 
 
