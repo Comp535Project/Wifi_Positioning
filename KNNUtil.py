@@ -4,6 +4,10 @@ import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from DataUtil import KaggleDataUtil
 from DataUtil import prepare_Mat
+from DataUtil import MatUtil
+from RandomForestUtil import MatRandomForest
+from RandomForestUtil import mergeLabeling
+from RandomForestUtil import PREDICT_BY_COORINATE,PREDICT_BY_LABEL
 import matplotlib.pyplot as plt
 import time
 import pandas as pd
@@ -18,7 +22,13 @@ class KNNUtil:
 
 
     def train_test_split_knn(self,ratio):
-        df = prepare_Mat();
+        # df = prepare_Mat();
+        df = mergeLabeling('./newdata/offline_data_random.csv')
+        df = pd.concat([df, mergeLabeling('./newdata/offline_data_random.csv')], axis=0)
+        # df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
+        # df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
+        # df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+        # df = df.dropna()
         x = df.loc[:, 'ap1':'ap6']
         x = pd.concat([x, df.label], axis=1)
         y = df.loc[:, 'x':'y']
@@ -39,6 +49,7 @@ class KNNUtil:
         test_sum = np.sum(np.square(X_test), axis=1)
         train_sum = np.sum(np.square(X_train), axis=1)
         inner_product = np.dot(X_test, X_train.T)
+
         dists = np.sqrt(-2 * inner_product + test_sum.reshape(-1, 1) + train_sum)
         return dists
 
@@ -80,8 +91,9 @@ class KNNUtil:
         classify with knn,loop and find best K
         :return:None
         """
-        X_train, X_test, y_train, y_test = self.train_test_split(0.4)
+        X_train, X_test, y_train, y_test = self.train_test_split_knn(0.6)
         distance = self.compute_distances_no_loops(X_test,X_train)
+
         for ki in self.k_range:
             print("k = " + str(ki) + " begin ")
             start = time.time()
@@ -100,6 +112,25 @@ class KNNUtil:
             end = time.time()
             print("Complete time: " + str(end - start) + " Secs.")
 
+        # new_df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
+        # new_df = pd.concat([new_df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
+        new_df = mergeLabeling('./newdata/offline_data_random.csv')
+        new_df = pd.concat([new_df, mergeLabeling('./newdata/offline_data_random.csv')], axis=0)
+        new_df = new_df[~new_df.isin([np.nan, np.inf, -np.inf]).any(1)]
+        new_df = new_df.dropna()
+        # new_df = new_df.loc[:, 'ap1':'ap6']
+        # X_all = new_df.loc[:, 'ap1':'ap6']
+        # X_all = pd.concat([X_all, new_df.label], axis=1)
+        # X_all = X_all.to_numpy()
+        distance = self.compute_distances_no_loops(X_test, X_train)
+        y_pred = self.predict_labels(distance, y_train, 5)
+        frame2 = pd.DataFrame(y_pred)
+        frame1 = pd.DataFrame(X_test)
+        frame1 = pd.concat([frame1, frame2], axis=1)
+        frame1.columns = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6','label', 'x', 'y']
+        frame1['label'] = (frame1.x // 240) + ((frame1.y // 20) - (frame1.y) // 20 % 10)
+
+        MatUtil().SimpleVisulizeCoord(frame1)
 
     def plot_accuracy(self):
         """

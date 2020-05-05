@@ -183,7 +183,7 @@ class MatUtil:
         """
         x = new_df.x
         y = new_df.y
-        plt.scatter(x=x, y=y, s=3, c=new_df.label)
+        plt.scatter(x=x, y=y, s=1, c=new_df.label)
         plt.title(self.filename)
         plt.xlabel('x')
         plt.ylabel('y')
