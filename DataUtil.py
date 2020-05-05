@@ -7,7 +7,7 @@ import os
 import numpy as np
 import h5py
 import pickle
-
+from ProjectConstant import *
 class KaggleDataUtil:
     def __init__(self, filename = None):
         if filename != None:
@@ -133,7 +133,7 @@ class MatUtil:
         # print(new_df.label)
 
         # plot data
-        # self.SimpleVisulizeCoord(new_df)
+        # SimpleVisulizeCoord(new_df)
 
         return new_df
 
@@ -175,20 +175,6 @@ class MatUtil:
         new_df = new_df.dropna()
         return new_df.astype(np.float32)
 
-    def SimpleVisulizeCoord(self,new_df):
-        """
-        visualize and color the dataframe
-        :param new_df:
-        :return: void
-        """
-        x = new_df.x
-        y = new_df.y
-        plt.scatter(x=x, y=y, s=3, c=new_df.label)
-        plt.title(self.filename)
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.show()
-
     def listrange(self,start_,stop_,gap,droprange):
         """
         Used to split the raw data into range
@@ -203,6 +189,25 @@ class MatUtil:
             for y in range(x-droprange,x+droprange,1):
                 res.append(y)
         return res
+
+def SimpleVisulizeCoord(new_df,based_label):
+    """
+    visualize and color the dataframe
+    :param new_df:
+    :return: void
+    """
+    x = new_df.x
+    y = new_df.y
+    if based_label == ORIGINAL_LABEL:
+        plt.scatter(x=x, y=y, s=3, c=new_df.label)
+    elif based_label == PREDICT_BY_LABEL:
+        plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_direct)
+    elif based_label == PREDICT_BY_COORDINATE:
+        plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_coord)
+    plt.title(based_label)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
 
 def labeldata(dataframe):
     """
@@ -221,12 +226,15 @@ def prepare_Mat():
     :return: dataframe finsihed splitting
     """
     df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
-    df.sample(frac=0.5,replace=True,random_state=1)
+    # df = df.sample(frac=0.5,replace=True,random_state=1)
     df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
-    df.sample(frac=0.5,replace=True,random_state=1)
+    # df = df.sample(frac=0.5,replace=True,random_state=1)
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
-    df.sample(frac=0.5,replace=True,random_state=1)
+    df = df.sample(frac=0.3,replace=True,random_state=1)
+
+    SimpleVisulizeCoord(df,ORIGINAL_LABEL)
+    print("prepare_Mat size: ",df.shape)
 
     return df
 

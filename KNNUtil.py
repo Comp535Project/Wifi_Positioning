@@ -7,20 +7,28 @@ from DataUtil import prepare_Mat
 import matplotlib.pyplot as plt
 import time
 import pandas as pd
-
-
+from ProjectConstant import *
+from RandomForestUtil import mergeLabeling
 class KNNUtil:
 
-    def __init__(self, k):
+    def __init__(self, k, ratio,based_label):
         self.scores = []
         self.k = k
         self.k_range = range(1, k)
+        self.ratio = ratio
+        self.basedLabel = based_label
 
 
     def train_test_split_knn(self,ratio):
-        df = prepare_Mat();
+        df = prepare_Mat()
+        df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+        df = df.dropna()
+        df = mergeLabeling(df,ratio)
         x = df.loc[:, 'ap1':'ap6']
-        x = pd.concat([x, df.label], axis=1)
+        if self.basedLabel == PREDICT_BY_LABEL:
+            x = pd.concat([x, df.rf_label_direct], axis=1)
+        elif self.basedLabel == PREDICT_BY_COORDINATE:
+            x = pd.concat([x, df.rf_label_coord], axis=1)
         y = df.loc[:, 'x':'y']
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=ratio, random_state=0)
         return X_train.to_numpy(), X_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
@@ -80,7 +88,7 @@ class KNNUtil:
         classify with knn,loop and find best K
         :return:None
         """
-        X_train, X_test, y_train, y_test = self.train_test_split(0.4)
+        X_train, X_test, y_train, y_test = self.train_test_split_knn(self.ratio)
         distance = self.compute_distances_no_loops(X_test,X_train)
         for ki in self.k_range:
             print("k = " + str(ki) + " begin ")
@@ -123,6 +131,9 @@ class KNNUtil:
         # plt.scatter(X_test[:,'LONGTITUDE'], X_test[:, 'LATITUDE'], c=y_test)
         # plt.show()
 
+
+def plot_best_knn(based_label,best_k):
+    pass
 #
 # if __name__ == "__main__":
 #     knn = KNNUtil(3)
