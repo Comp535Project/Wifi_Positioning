@@ -129,10 +129,6 @@ class MatUtil:
 
         new_df = labeldata(new_df)
 
-        # print(new_df.label)
-
-        # plot data
-        # SimpleVisulizeCoord(new_df)
 
         return new_df
 
@@ -143,7 +139,6 @@ class MatUtil:
         """
         lenthoffile = len(self.filename.split('_'))
         print("Processing :", self.filename)
-        # print(lenthoffile)
         column_ = []
         if lenthoffile > 2:
             columns_ = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
@@ -153,8 +148,7 @@ class MatUtil:
         rss = pd.DataFrame(list(self.dataset.values())[-2])
         new_df = pd.concat([features, rss], axis=1)
         new_df.columns = columns_
-        # new_df.to_csv(self.filename+'.csv')
-        # print(new_df)
+
 
         # from 200 to 1750,gap250
         selectedx = self.listrange(200, 2000, 250, 30)
@@ -166,10 +160,7 @@ class MatUtil:
 
         new_df = labeldata(new_df)
 
-        # print(new_df.label)
 
-        # plot data
-        # self.SimpleVisulizeCoord(new_df)
         new_df = new_df.replace([np.inf, -np.inf], np.nan)
         new_df = new_df.dropna()
         return new_df.astype(np.float32)
@@ -196,8 +187,6 @@ def SimpleVisulizeCoord(new_df, based_label, k, allowVisualize):
     :param new_df:
     :return: void
     """
-    # print("-" * 30)
-    # print(allowVisualize)
     if allowVisualize == ALLOW_PLOT_PROCESS_GRAPH:
         x = new_df.x
         y = new_df.y
@@ -225,7 +214,7 @@ def labeldata(dataframe):
     :return:    dataframe with new label column
     """
     dataframe['label'] = (dataframe.x // 240) + ((dataframe.y // 20) - (dataframe.y) // 20 % 10)
-    # print((dataframe.y)//20%10)
+
     # dataframe['label'] = (dataframe.x//480) + ((dataframe.y//40) - (dataframe.y)//40%10)
     return dataframe
 
@@ -244,7 +233,7 @@ def prepare_Mat(fraction=1,allowVisualize = FORBID_PLOT_PROCESS_GRAPH):
     df = df.sample(frac=fraction, replace=True, random_state=1)
 
     SimpleVisulizeCoord(df, ORIGINAL_LABEL,None, allowVisualize)
-    print("prepare_Mat size: ", df.shape)
+    # print("prepare_Mat size: ", df.shape)
 
     return df
 

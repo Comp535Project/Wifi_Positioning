@@ -24,11 +24,11 @@ def mergePlot_knn(knn_models):
 if __name__ == "__main__":
     k = input("input the max K: ")
 
-    knn_original = KNNUtil(eval(k),ratio=0.3,based_label=ORIGINAL_LABEL, fraction=1,
+    knn_original = KNNUtil(eval(k),ratio=0.3,based_label=ORIGINAL_LABEL, fraction=0.1,
                            allowVisualize=FORBID_PLOT_PROCESS_GRAPH)
-    knn_coordinate = KNNUtil(eval(k),ratio=0.3,based_label=PREDICT_BY_COORDINATE, fraction=11,
+    knn_coordinate = KNNUtil(eval(k),ratio=0.3,based_label=PREDICT_BY_COORDINATE, fraction=0.1,
                              allowVisualize=FORBID_PLOT_PROCESS_GRAPH)
-    knn_direct_label = KNNUtil(eval(k),ratio=0.3,based_label=PREDICT_BY_LABEL, fraction=1,
+    knn_direct_label = KNNUtil(eval(k),ratio=0.3,based_label=PREDICT_BY_LABEL, fraction=0.1,
                                allowVisualize=FORBID_PLOT_PROCESS_GRAPH)
 
     knn_original.classify()

@@ -102,6 +102,8 @@ class KNNUtil:
         classify with knn,loop and find best K
         :return:None
         """
+
+        print("*"*30 + "KNN called for " + str(self.basedLabel) + "*"*30)
         global X_train, X_test, y_train, y_test
         X_train, X_test, y_train, y_test  = self.train_test_split_knn(self.ratio)
         distance = self.compute_distances_no_loops(X_test,X_train)
@@ -110,8 +112,8 @@ class KNNUtil:
         best_ki = -1
 
         for ki in self.k_range:
-            print("k = " + str(ki) + " begin ")
-            start = time.time()
+            # print("k = " + str(ki) + " begin ")
+            # start = time.time()
             y_pred = self.predict_labels(distance,y_train,ki)
             coordinate_dist = self.compute_coordinate_dist(y_test,y_pred)
             correct_count = np.sum((coordinate_dist < 200) == True)
@@ -129,11 +131,11 @@ class KNNUtil:
             if rms_error[0] < lowest_error:
                 best_ki = ki
                 lowest_error = rms_error[0]
-            end = time.time()
-            print("Complete time: " + str(end - start) + " Secs.")
+            # end = time.time()
+            # print("Complete time: " + str(end - start) + " Secs.")
 
         print("*"*30 + "KNN Finished" + "*"*30)
-        print("The best k is {}\n,The according rms error is {}".format(best_ki,lowest_error))
+        print("The best k is {} ,The according rms error is {}".format(best_ki,lowest_error))
 
         self.plot_result(best_ki)
 
