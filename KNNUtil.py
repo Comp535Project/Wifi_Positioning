@@ -11,7 +11,7 @@ from RandomForestUtil import mergeLabeling
 
 class KNNUtil:
 
-    def __init__(self, k, ratio,based_label,fraction):
+    def __init__(self, k, ratio, based_label, fraction, allowVisualize = FORBID_PLOT_PROCESS_GRAPH):
         """
         init function for the KNN model
         :param k:the largest k needed for consideration
@@ -21,17 +21,19 @@ class KNNUtil:
         :param fraction: it's used for importing and preprocessing data,we take sample of raw data for convience of computation,
                          normally we set it to 1,if your laptop could hold the size of matrix,when you get MemoryError,
                          set it to a lower value.
+        :param allowVisualize: used to allow visualization plotting the scatter points,they are constant values
         """
         self.scores = []
         self.k = k
         self.k_range = range(1, k)
         self.ratio = ratio
+        self.allowVisualize = allowVisualize
         self.basedLabel = based_label
         self.fraction = fraction
 
 
     def train_test_split_knn(self,ratio):
-        df = prepare_Mat(self.fraction)
+        df = prepare_Mat(self.fraction,allowVisualize=self.allowVisualize)
         df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
         df = df.dropna()
         df = mergeLabeling(df,ratio)
@@ -52,9 +54,9 @@ class KNNUtil:
         :param X_train: train point from ap1 to ap6
         :return:
         """
-        num_test = X_test.shape[0]
-        num_train = X_train.shape[0]
-        dists = np.zeros((num_test, num_train))
+        # num_test = X_test.shape[0]
+        # num_train = X_train.shape[0]
+        # dists = np.zeros((num_test, num_train))
         test_sum = np.sum(np.square(X_test), axis=1)
         train_sum = np.sum(np.square(X_train), axis=1)
         inner_product = np.dot(X_test, X_train.T)
@@ -161,14 +163,13 @@ class KNNUtil:
         frame2 = pd.DataFrame(y_pred)
         frame1 = pd.DataFrame(X_test)
         frame1 = pd.concat([frame1, frame2], axis=1)
-        frame1.columns = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6','label', 'x', 'y']
+        if self.basedLabel == ORIGINAL_LABEL:
+            frame1.columns = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'x', 'y']
+        else:
+            frame1.columns = ['ap1', 'ap2', 'ap3', 'ap4', 'ap5', 'ap6', 'label', 'x', 'y']
         frame1['label'] = (frame1.x // 240) + ((frame1.y // 20) - frame1.y // 20 % 10)
+        SimpleVisulizeCoord(frame1, ORIGINAL_LABEL,k,self.allowVisualize)
 
-        SimpleVisulizeCoord(frame1, ORIGINAL_LABEL,k)
-
-
-def plot_best_knn(based_label,best_k):
-    pass
 #
 # if __name__ == "__main__":
 #     knn = KNNUtil(3)

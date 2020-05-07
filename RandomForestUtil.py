@@ -25,7 +25,7 @@ class MatRandomForest:
             print("first time usage of RandomForest model,GridSearch for parameters")
             self.model = self.GridSearchRandomForest()
         else:
-            print("RandomForest Model Loaded Finished..")
+            print("RandomForest Model Loading Finished..")
 
     def train_test_split_rf_with_single_label(self, ratio):
         """
@@ -57,7 +57,7 @@ class MatRandomForest:
         GridSearch template for RandomForest
         :return:classifier , prediction value
         """
-
+        print("Call GridSearchRandomForest for building model...")
         # configureable
         global X_train, y_train, X_test, y_test
         if self.tickle == PREDICT_BY_LABEL:
@@ -68,10 +68,10 @@ class MatRandomForest:
 
         rf = RandomForestRegressor(random_state=42)
         param_grid = {
-            'n_estimators': [10, 60, 100],
+            'n_estimators': [100, 200, 300, 500],
             'max_features': ['auto'],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 10],
+            'min_samples_split': [2, 5, 10, 30, 50],
+            'min_samples_leaf': [10, 20, 30],
             'criterion': ['mse']
         }
         CV_rfc = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5)
@@ -139,13 +139,13 @@ def mergeLabeling(df,ratio):
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
     LabelClassifier = MatRandomForest("./models/rfmodel.sav", PREDICT_BY_LABEL,ratio)
-    # print("*" * 80)
-    # print("LabelClassifier Parameters: ",LabelClassifier.model)
-    # print("*" * 80)
+    print("*" * 80)
+    print("LabelClassifier Parameters: ",LabelClassifier.model)
+    print("*" * 80)
     CoordClassifier = MatRandomForest("./models/rfmodel_coordinate.sav", PREDICT_BY_COORDINATE,ratio)
-    # print("*" * 80)
-    # print("CoordClassifier Parameters: ",CoordClassifier.model)
-    # print("*" * 80)
+    print("*" * 80)
+    print("CoordClassifier Parameters: ",CoordClassifier.model)
+    print("*" * 80)
     df = LabelClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_LABEL)
     df = CoordClassifier.LabelDataByRandomForest(df = df, tickle=PREDICT_BY_COORDINATE)
     # print(df.head)

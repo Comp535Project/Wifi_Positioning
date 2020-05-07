@@ -31,8 +31,6 @@ class KaggleDataUtil:
         y.fillna(axis=0, method='ffill', inplace=True)
         # x = preprocessing.normalize(x, norm='l2')
         # print(x)
-        # TODO:NORMALIZE following https://www.kaggle.com/sunnerli/train-some-simple-model-and-print-the-error/code
-
         X, y = x, y
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio, random_state=0)
         # print(type(X_train))
@@ -192,29 +190,32 @@ class MatUtil:
         return res
 
 
-def SimpleVisulizeCoord(new_df, based_label, k=None):
+def SimpleVisulizeCoord(new_df, based_label, k, allowVisualize):
     """
     visualize and color the dataframe
     :param new_df:
     :return: void
     """
-    x = new_df.x
-    y = new_df.y
-    if based_label == ORIGINAL_LABEL:
-        plt.scatter(x=x, y=y, s=3, c=new_df.label)
-    elif based_label == PREDICT_BY_LABEL:
-        plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_direct)
-    elif based_label == PREDICT_BY_COORDINATE:
-        plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_coord)
+    # print("-" * 30)
+    # print(allowVisualize)
+    if allowVisualize == ALLOW_PLOT_PROCESS_GRAPH:
+        x = new_df.x
+        y = new_df.y
+        if based_label == ORIGINAL_LABEL:
+            plt.scatter(x=x, y=y, s=3, c=new_df.label)
+        elif based_label == PREDICT_BY_LABEL:
+            plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_direct)
+        elif based_label == PREDICT_BY_COORDINATE:
+            plt.scatter(x=x, y=y, s=3, c=new_df.rf_label_coord)
 
-    if k is None:
-        plt.title(based_label)
-    else:
-        titlestr = KNN_BEST_K_RESULT + str(k)
-        plt.title(titlestr)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.show()
+        if k is None:
+            plt.title(based_label)
+        else:
+            titlestr = KNN_BEST_K_RESULT + str(k)
+            plt.title(titlestr)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.show()
 
 
 def labeldata(dataframe):
@@ -229,24 +230,23 @@ def labeldata(dataframe):
     return dataframe
 
 
-def prepare_Mat(fraction=1):
+def prepare_Mat(fraction=1,allowVisualize = FORBID_PLOT_PROCESS_GRAPH):
     """
     shared method apply on the mat datatype
     :return: dataframe finsihed splitting
     """
     df = MatUtil(r'./data/offline_data_uniform.mat').mat_to_csv()
     # df = df.sample(frac=0.5,replace=True,random_state=1)
-    df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
+    # df = pd.concat([df, MatUtil(r'./data/offline_data_random.mat').mat_to_csv()], axis=0)
     # df = df.sample(frac=0.5,replace=True,random_state=1)
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     df = df.dropna()
     df = df.sample(frac=fraction, replace=True, random_state=1)
 
-    SimpleVisulizeCoord(df, ORIGINAL_LABEL)
+    SimpleVisulizeCoord(df, ORIGINAL_LABEL,None, allowVisualize)
     print("prepare_Mat size: ", df.shape)
 
     return df
-
 
 def createandlistdata():
     """
@@ -282,7 +282,7 @@ def loadModel(filepath):
         file = open(filepath, 'rb')
         return pickle.load(open(filepath, 'rb'))
     except FileNotFoundError as fnfe:
-        print("Filenot found at DataUtil.loadModel", fnfe.errno)
+        print("Filenot found at DataUtil.loadModel")
         return None
     except IOError as ioe:
         print("IO error happens at DataUtil.loadModel", ioe)
